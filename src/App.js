@@ -8,6 +8,7 @@ class App extends Component {
   constructor(){
     super();
     this.state = {
+      units: 'si',
       apiUrl: 'https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/055a53f5a6b68703fe86456a74f6da17/'
     };
     this.getWheatherData = this.getWheatherData.bind(this)
@@ -17,10 +18,10 @@ class App extends Component {
   }
 
   async getWheatherData(coordinates){
-    const { apiUrl } = this.state;
+    const { apiUrl, units } = this.state;
     try {
-      console.log(`${apiUrl}${coordinates.lat},${coordinates.lng}`)
-      const response = await axios.get(`${apiUrl}${coordinates.lat},${coordinates.lng}`);
+      console.log(`${apiUrl}${coordinates.lat},${coordinates.lng}?units=${units}`)
+      const response = await axios.get(`${apiUrl}${coordinates.lat},${coordinates.lng}?units=${units}`);
       console.log(response);
     } catch (error) {
       console.error(error);
