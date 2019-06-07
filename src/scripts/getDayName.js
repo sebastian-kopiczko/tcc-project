@@ -1,0 +1,1 @@
+export default  (timestamp, locale) => new Date(timestamp * 1000).toLocaleDateString(locale, { weekday: 'long' })

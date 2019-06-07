@@ -1,16 +1,21 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import axios from "axios";
+import TextField from "@material-ui/core/TextField";
 
 import AppContainer from "./components/AppContainer";
 import Autocomplete from "react-google-autocomplete";
-import Forecast from "./components/Forecast";
+import Forecast from "./components/Forecast/Forecast";
+
+import CssBaseline from "@material-ui/core/CssBaseline";
 import "./App.css";
+import loader from "./assets/loader.gif"
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
       isDataReady: false,
+      toggleLoader: false,
       units: "si",
       language: "pl",
       apiUrl:
@@ -24,7 +29,7 @@ class App extends Component {
       const response = await axios.get(
         `${apiUrl}${lat},${lng}?units=${units}&lang=${language}`
       );
-      this.setState({ weatherData: response.data, isDataReady: true });
+      this.setState({ weatherData: response.data, isDataReady: true, toggleLoader: false });
     } catch (error) {
       console.error(error);
     }
@@ -41,32 +46,41 @@ class App extends Component {
     );
   };
 
+  onPlaceSelected = place => {
+    const { formatted_address } = place;
+    const { location } = place.geometry;
+    this.setState({isDataReady: false, toggleLoader: true},      
+    this.setCoordinates(
+      location.lat(),
+      location.lng(),
+      formatted_address,
+      this.getWheatherData
+      )
+    )
+  };
+
   render() {
-    const { isDataReady, weatherData, formattedAddress } = this.state;
+    const { isDataReady, toggleLoader, weatherData, formattedAddress } = this.state;
     const forecastData = { ...weatherData, formattedAddress };
     return (
-      <div className="app">
+      <Fragment>
+        <CssBaseline />
         <AppContainer>
           <Autocomplete
-            style={{ width: "90%" }}
+            className="app__input"
             types={["(cities)"]}
-            onPlaceSelected={place => {
-              console.log(place);
-              const { formatted_address } = place;
-              const { location } = place.geometry;
-              this.setCoordinates(
-                location.lat(),
-                location.lng(),
-                formatted_address,
-                this.getWheatherData
-              );
-            }}
+            onPlaceSelected={place => this.onPlaceSelected(place)}
           />
           {isDataReady && Object.entries(weatherData).length !== 0 ? (
             <Forecast data={forecastData} />
           ) : null}
+          {toggleLoader ? (
+            <div className="loader">
+            <img src={loader} alt="Ładowanie" />
+            </div>
+          ) : null}
         </AppContainer>
-      </div>
+      </Fragment>
     );
   }
 }
